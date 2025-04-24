@@ -310,6 +310,13 @@ def predict_most_purchased_item(transactions):
     return overall_most_purchased, top_by_category, monthly_top_product
 
 
+class PredictModelException(Exception):
+    """Custom exception for handling errors in the prediction process."""
+    def __init__(self, message):
+        super().__init__(message)
+        self.message = message
+
+
 @dataclass
 class ShoppingPredictions:
     """
@@ -348,15 +355,11 @@ def predict_next_item_for_customer(predict_next_item, transactions, products, cu
             "product_name": product_name
             }
         else:
-            return {
-            "status": "error",
-            "message": f"Predicted product ID {predicted_next_item} not found in product catalog."
-        }
+    #       return exception
+            raise PredictModelException(f"Product ID {predicted_next_item} not found in the product list.")
     else:
-       return {
-        "status": "error",
-        "message": f"No transactions found for customer ID: {customer_id} in the record"
-    }
+
+        raise PredictModelException(f"Customer {customer_id} has no purchase history.")
         
 
 
@@ -380,9 +383,7 @@ def predict_next_purchase_date_for_customer(get_next_purchase_date, orders, cust
         "date_obj": next_purchase_date
     }
     else:
-        return {
-        "message": f"{customer_id} next purchase date is not available."
-    }
+        raise PredictModelException(f"Next purchase date for customer {customer_id} could not be predicted.")
     
 
 

@@ -9,7 +9,7 @@ from orjson import orjson
 from ml.Main import predict_next_item_for_customer, get_recommendations_for_customer, \
     predict_next_purchase_date_for_customer, ShoppingPredictions, create_features, \
     build_next_purchase_date_model, build_next_item_model, predict_most_purchased_item, load_data, stringify_keys, \
-    EnhancedJSONEncoder, default_serializer, predict_data
+    EnhancedJSONEncoder, default_serializer, predict_data, PredictModelException
 
 app = Flask(__name__)
 
@@ -78,20 +78,20 @@ overall_most_purchased, top_by_category, monthly_top_product = predict_most_purc
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
-        data = request.get_json()
-        if 'customer_id' not in data:
-            return jsonify({"error": "Missing customer_id in request"}), 400
+        customer_id = request.args.get('customer_id')  # Get 'user_id' from query parameter
+        if not customer_id:
+            return jsonify({'error': 'user_id parameter is required'}), 40
 
-        customer_id = data['customer_id']
-        if customer_id not in customers['customer_id'].values:
-            return jsonify({"error": f"Customer ID {customer_id} not found"}), 404
         # Check if customer_id is a valid integer
         print(customer_id)
         # Generate predictions
-        predicted_data = predict_data(customer_id)
+        predicted_data = predict_data(int(customer_id))
         print(predicted_data)
         return predicted_data
 
+    except PredictModelException as e:
+        app.logger.error(f'PredictModelException: {str(e)}', exc_info=True)
+        return jsonify({"error": str(e)}), 400
     except Exception as e:
         app.logger.error(f'Error: {str(e)}', exc_info=True)
         return jsonify({"error": f"Error generating predictions: {str(e)}"}), 500
