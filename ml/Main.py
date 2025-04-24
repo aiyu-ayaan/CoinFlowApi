@@ -318,7 +318,6 @@ class ShoppingPredictions:
     next_item: Optional[Dict[str, Any]] = None
     recommendations: Optional[Dict[str, Any]] = None
     next_purchase_date: Optional[Dict[str, Any]] = None
-    models_status: str = ""
     # product_transition_matrix: Optional[pd.DataFrame] = None
     # overall_most_purchased: Optional[pd.Series] = None
     # top_by_category: Optional[pd.DataFrame] = None
@@ -378,8 +377,7 @@ def predict_data(customer_id :int) -> str:
     prediction = ShoppingPredictions(
         next_item=next_item,
         recommendations=recommendations,
-        next_purchase_date=next_date,
-        models_status="Models built successfully.",
+        next_purchase_date=next_date
         # product_transition_matrix=product_transition_matrix,
         # overall_most_purchased=overall_most_purchased,
         # top_by_category=top_by_category,
@@ -437,5 +435,5 @@ def stringify_keys(obj):
 
 
 if __name__ == "__main__":
-    print(predict_data(211163))
+    print(predict_data(1060685))
 

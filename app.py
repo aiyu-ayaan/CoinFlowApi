@@ -89,7 +89,7 @@ def predict():
         print(customer_id)
         # Generate predictions
         predicted_data = predict_data(customer_id)
-
+        print(predicted_data)
         return predicted_data
 
     except Exception as e:
