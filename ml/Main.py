@@ -326,14 +326,38 @@ class ShoppingPredictions:
 
 def predict_next_item_for_customer(predict_next_item, transactions, products, customer_id):
     """Predict the next item a customer will purchase."""
-    sample_customer_last_product = \
-        transactions[transactions['customer_id'] == customer_id].sort_values('order_date').iloc[-1]['product_id']
-    predicted_next_item = predict_next_item(sample_customer_last_product)
-    product_name = products[products['product_id'] == predicted_next_item]['product_name'].iloc[0]
-    return {
-        "product_id": predicted_next_item,
-        "product_name": product_name
+    # sample_customer_last_product = \
+    #     transactions[transactions['customer_id'] == customer_id].sort_values('order_date').iloc[-1]['product_id']
+    # predicted_next_item = predict_next_item(sample_customer_last_product)
+    # product_name = products[products['product_id'] == predicted_next_item]['product_name'].iloc[0]
+    # return {
+    #     "product_id": predicted_next_item,
+    #     "product_name": product_name
+    # }
+    filtered = transactions[transactions['customer_id'] == customer_id].sort_values('order_date')
+
+    if not filtered.empty:
+        sample_customer_last_product = filtered.iloc[-1]['product_id']
+        predicted_next_item = predict_next_item(sample_customer_last_product)
+        product_row = products[products['product_id'] == predicted_next_item]
+        if not product_row.empty:
+            product_name = product_row['product_name'].iloc[0]
+            # print(f"Customer {sample_customer_id} next purchase item prediction: {product_name} (ID: {predicted_next_item})")
+            return {
+            "product_id": predicted_next_item,
+            "product_name": product_name
+            }
+        else:
+            return {
+            "status": "error",
+            "message": f"Predicted product ID {predicted_next_item} not found in product catalog."
+        }
+    else:
+       return {
+        "status": "error",
+        "message": f"No transactions found for customer ID: {customer_id} in the record"
     }
+        
 
 
 def get_recommendations_for_customer(recommend_items, products, customer_id, num_recommendations=3):
@@ -350,10 +374,16 @@ def predict_next_purchase_date_for_customer(get_next_purchase_date, orders, cust
     """Predict when a customer will make their next purchase."""
     sample_customer_last_date = orders[orders['customer_id'] == customer_id]['order_date'].max()
     next_purchase_date = get_next_purchase_date(customer_id, sample_customer_last_date)
-    return {
+    if pd.notna(next_purchase_date):
+        return {
         "date": next_purchase_date.strftime('%d-%m-%Y'),
         "date_obj": next_purchase_date
     }
+    else:
+        return {
+        "message": f"{customer_id} next purchase date is not available."
+    }
+    
 
 
 def predict_data(customer_id :int) -> str:
